@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!-- +++++ Main Contect +++++ -->
+{% block content %}
+
+	<!-- +++++ Projects Section +++++ -->
+
+	<div class="container pt">
+		<div class="row mt centered">	
+			<div class="col-lg-12">
+				<a class="zoom green" href="{% url 'image_classification' %}"><img class="img-responsive" src="{% static 'img/portfolio/port01.jpg' %}" alt="" /></a>
+				<p>Image Classification</p>
+			</div>
+		</div><!-- /row -->
+	</div><!-- /container -->
+
+{% endblock %}

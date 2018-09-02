@@ -1,0 +1,96 @@
+/*
+ * Author: Wei-Lin KU
+ *
+ * Date: 2016/02/19
+ */
+
+/* ---- grid ---- */
+.grid {
+	width: 90%;
+	margin: 0px auto;
+	padding-top: 100px;
+}
+
+.grid-retreival {
+	width: 33%;
+	margin: 0px auto;
+	padding-top: 100px;
+}
+
+/* clear fix */
+.grid:after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+/* ---- .grid-item ---- */
+.grid-sizer, .grid-item { 
+	width: 33%;
+}
+.gutter-sizer { 
+	width: 0.0%;
+}
+.grid-sizer-retrieval, .grid-item-retrieval { 
+	width: 100%;
+}
+
+/* RWD */
+@media screen and (min-width: 960px) {
+	.grid-sizer, .grid-item { 
+		width: 20%; 
+	}
+	.gutter-sizer { 
+		width: 0.0%; 
+	}
+}
+@media screen and (min-width: 769px) and (max-width: 959px) {
+	.grid-sizer, .grid-item { 
+		width: 33%; 
+	}
+	.gutter-sizer { 
+		width: 0.0%; 
+	}
+}
+
+@media screen and (min-width: 592px) and (max-width: 768px) {
+	.grid-sizer, .grid-item { 
+		width: 50%; 
+	}
+	.gutter-sizer { 
+		width: 0.0%; 
+	}
+}
+
+@media screen and (min-width: 0px) and (max-width: 591px) {
+	.grid-sizer, .grid-item { 
+		width: 100%; 
+	}
+	.gutter-sizer { 
+		width: 0.0%; 
+	}
+}
+
+.grid-item, .grid-item-retrieval {
+	float: left;
+	background: transparent;
+}
+
+.grid-item img, .grid-item-retrieval img {
+	display: block;
+	max-width: 100%;
+	border: 3px solid transparent; 
+	border-radius: 0%;
+}
+
+/* ---- .grid-item hover event ---- */
+.grid-item img:hover, .grid-item-retrieval img:hover {
+	cursor: pointer;
+	border: 1px solid transparent; 
+
+	-webkit-transition: border 0.1s ease-in-out;
+    -moz-transition: border 0.1s ease-in-out;
+    -ms-transition: border 0.1s ease-in-out;
+    -o-transition: border 0.1s ease-in-out;
+    transition: border 0.1s ease-in-out;
+}

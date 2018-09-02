@@ -1,0 +1,574 @@
+{% extends "base-testing.html" %}
+{% load staticfiles %}
+
+<!-- Added Script -->
+{% block static %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.2.0/dropzone.css" rel="stylesheet">
+<link href="{% static 'work/css/masonry.css' %}" rel="stylesheet">
+
+<script src="{% static 'work/js/dropzone_custom.js' %}"></script>
+<script src="{% static 'work/js/masonry.pkgd.min.js' %}"></script>
+<script src="{% static 'work/js/imagesloaded.pkgd.min.js' %}"></script>
+<script type="text/javascript">
+
+	/* Formatted-String (Javascript) */ 
+	String.format = function() {
+	    // The string containing the format items (e.g. "{0}")
+	    // will and always has to be the first argument.
+	    var theString = arguments[0];
+	    
+	    // start with the second argument (i = 1)
+	    for (var i = 1; i < arguments.length; i++) {
+	        // "gm" = RegEx options for Global search (more than one instance)
+	        // and for Multiline search
+	        var regEx = new RegExp("\\{" + (i - 1) + "\\}", "gm");
+	        theString = theString.replace(regEx, arguments[i]);
+	    }
+	    return theString;
+	}
+
+	/* Overrided (added) jQuery's prototype function */
+	$.fn.masonryImagesReveal = function( _items ) {
+		var msnry = this.data('masonry');
+		var itemSelector = msnry.options.itemSelector;
+		// hide by default
+		_items.hide();
+		// append to container
+		this.append( _items );
+		_items.imagesLoaded().progress( function( imgLoad, image ) {
+			// get item
+			// image is imagesLoaded class, not <img>, <img> is image.img
+			var $item = $( image.img ).parents( itemSelector );
+			// un-hide item
+			$item.show();
+			// masonry does its thing
+			msnry.appended( $item );
+		});
+  		msnry.layout();
+
+  		return this;
+	};
+	/* Overrided (added) jQuery's prototype function */
+	$.fn.masonryImagesRemoval = function( _items ) {
+		var msnry = this.data('masonry');
+		for(var _i=0; _i<_items.length; _i++){
+			msnry.remove(_items[_i]);
+		}
+
+  		return this;
+	};
+
+	/* Flickr Images Loading */
+	var ajax_load_Flickr = function( _grid ) {
+		$.get("{% url 'ajax_load_Flickr_photo_view' %}").done(function( response ) {
+			var items = "";
+			
+			// loading images
+			var photo_list = response.image_set.photo;
+			for(var _i=0; _i<photo_list.length; _i++){
+				items = items + String.format("<div class=\"grid-item\"> <img src={0} href=\"#classification_section_top\"/> </div>", photo_list[_i].url_m);
+			}
+
+      		// making jQuery-object
+      		var $items = $( items );
+  			// appending items to grid
+  			_grid.masonryImagesReveal( $items );
+		})
+	};
+
+	/* DB Album Loading */
+	var ajax_load_album = function( _grid ) {
+		$.get("{% url 'ajax_load_Album_photo_view' %}").done(function( response ) {
+			var items = "";
+			
+			// loading images
+			var photo_urls = response.image_set;
+			for(var _i=0; _i<photo_urls.length; _i++){
+				items = items + String.format("<div class=\"grid-item\"> <img src={0}/> </div>", photo_urls[_i]);
+			}
+
+      		// making jQuery-object
+      		var $items = $( items );
+  			// appending items to grid
+  			_grid.masonryImagesReveal( $items );
+		})
+	};
+
+	$(document).ready(function(){
+
+		/* Tooltip all on */
+		$('[data-toggle="tooltip"]').tooltip();   
+
+		/* Init Masonry Arguments */
+		var $grid = $('#myGrid').masonry({
+			columnWidth: '.grid-sizer',
+			gutter: '.gutter-sizer',
+			itemSelector: '.grid-item',
+			percentPosition: true,
+			initLayout: false,
+			transitionDuration: '0.2s',
+		});
+
+		var $grid_filtered = $('#myGrid-filtered').masonry({
+			columnWidth: '.grid-sizer',
+			gutter: '.gutter-sizer',
+			itemSelector: '.grid-item',
+			percentPosition: true,
+			initLayout: false,
+			transitionDuration: '0.2s',
+		});
+
+		var $grid_retreival = $('#myGrid-retreival').masonry({
+			columnWidth: '.grid-sizer-retrieval',
+			gutter: '.gutter-sizer',
+			itemSelector: '.grid-item-retrieval',
+			percentPosition: true,
+			initLayout: false,
+			transitionDuration: '0.2s',
+		});
+
+
+		/* Ajax GET: Load Images (invoked ONCE) */
+		(function ajaxQueryImages(){
+			//ajax_load_Flickr( $grid );
+			ajax_load_album( $grid );
+		})();
+
+		/* Click Event: Masonry grid-Item */
+		/*
+		var $root = $('html, body');
+		$grid.on( 'click', '.grid-item img', function() {
+
+			// trigger ajax request for image classification [TensorFLow]
+			
+			$.ajax({
+			    url : "{% url 'ajax_cros_request_Tensorflow_view' %}",
+			    type: "POST",
+			    data : {'img_url': this.src},
+			    beforeSend: function(){
+			    	// loading animation starts
+			    	console.log('loading animation...');
+			    	$( "#cls-loading-inception" ).show();
+			    },
+			    success: function(response, textStatus, jqXHR){
+			    	console.log('ajax success...');
+					// display result table for 'Inception'
+					var result = response.result[1];
+					for(var i=0; i<result.length; i++){
+						var result_i = result[i]; 
+						$('#class-Inception-' + (i+1)).html(result_i[0]);
+						$('#predict-Inception-' + (i+1)).html((result_i[1]*100).toFixed(2) + "%");
+						$('#bar-Inception-' + (i+1)).attr('style', String.format("width:{0}%;", (result_i[1]*100).toFixed(2)));
+					}
+			    },
+			    complete: function(){
+			    	// loading animation ends
+			    	$( "#cls-loading-inception" ).hide();
+			    },
+			    error: function (jqXHR, textStatus, errorThrown){
+			 		console.log('ajax error');
+			    }
+			});
+			
+			// trigger ajax request for image classification [Caffe]
+			
+			$.ajax({
+			    url : "{% url 'ajax_cros_request_Caffe_view' %}",
+			    type: "POST",
+			    data : {'img_url': this.src},
+			    beforeSend: function(){
+			    	// loading animation starts
+			    	$( "#cls-loading-alex" ).show();
+			    },
+			    success: function(response, textStatus, jqXHR){
+			       	// display result table for 'Alex'
+					var result = response.result[1];
+					for(var i=0; i<result.length; i++){
+						var result_i = result[i]; 
+						$('#class-Alex-' + (i+1)).html(result_i[0]);
+						$('#predict-Alex-' + (i+1)).html((result_i[1]*100).toFixed(2) + "%");
+						$('#bar-Alex-' + (i+1)).attr('style', String.format("width:{0}%;", (result_i[1]*100).toFixed(2)));
+
+			 		}
+			    },
+			    complete: function(){
+			    	// loading animation ends
+			    	$( "#cls-loading-alex" ).hide();
+			    },
+			    error: function (jqXHR, textStatus, errorThrown){
+			 		// To be defined
+			 		console.log("error...");
+			    }
+			});
+			
+			// navigate slowly to the top section for classification visualization
+			$root.animate({
+		        scrollTop: $( $.attr(this, 'href') ).offset().top
+		    }, 500);
+
+			// display the target image to the left of resulting bar
+			$('#target-img').attr('src', this.src);
+		});
+		*/
+
+		// Get the template HTML and remove it from the document
+		var previewNode = document.querySelector("#template");
+		previewNode.id = "";
+		var previewTemplate = previewNode.parentNode.innerHTML;
+		previewNode.parentNode.removeChild(previewNode);
+		Dropzone.autoDiscover = false;
+
+		var myDropzone = new Dropzone("#upload-icon", { // Make the whole body a dropzone
+		  url: "{% url 'ajax_photo_upload_view' %}", // Set the url
+		  paramName: "img",
+		  acceptedFiles: "image/*",
+		  thumbnailWidth: 80,
+		  thumbnailHeight: 80,
+		  parallelUploads: 20,
+		  previewTemplate: previewTemplate,
+		  autoQueue: true, // Make sure the files aren't queued until manually added
+		  autoProcessQueue: true,
+		  parallelUploads: 5,
+		  previewsContainer: "#previews", // Define the container to display the previews
+		  clickable: "#upload-icon" // Define the element that should be used as click trigger to select files.
+		});
+
+		/* Turn OFF (temporary) the listener for later integration of the whole UI design */
+
+		myDropzone.on("success", function(file, response){
+			// adding the uploaded image to album list
+			var item = String.format("<div class=\"grid-item\"> <img src={0}/> </div>", response.image_url);
+
+      		// making jQuery-object
+      		var $item = $( item );
+
+  			// appending items to grid
+  			$grid.masonryImagesReveal( $item );
+		});
+
+		var myDropzoneImageSearch = new Dropzone("#image-search-icon", { // Make the whole body a dropzone
+		  url: "{% url 'ajax_image_search_view' %}", // Set the url
+		  paramName: "img",
+		  acceptedFiles: "image/*",
+		  thumbnailWidth: 80,
+		  thumbnailHeight: 80,
+		  parallelUploads: 20,
+		  previewTemplate: previewTemplate,
+		  autoQueue: true, // Make sure the files aren't queued until manually added
+		  autoProcessQueue: true,
+		  parallelUploads: 5,
+		  previewsContainer: "#previews", // Define the container to display the previews
+		  clickable: "#image-search-icon" // Define the element that should be used as click trigger to select files.
+		});
+
+		myDropzoneImageSearch.on("success", function(file, response){
+    		// new page for search result
+    		$('#myGrid').hide();
+			$('#myGrid-retreival').show();
+
+    		// show similiar images
+			var items = "";
+
+			// loading images
+			var photo_urls = response.image_set;
+			for(var _i=0; _i<photo_urls.length; _i++){
+				items = items + String.format("<div class=\"grid-item-retrieval\"> <img src={0}/> </div>", photo_urls[_i]);
+				console.log(photo_urls[_i]);
+			}
+
+			// work-around on 
+      		document.getElementById('myGrid-retreival').innerHTML = items;
+
+			// making jQuery-object
+      		//var $items = $( items );
+
+  			// appending items to grid
+  			//$grid_retreival.masonryImagesReveal( $items );
+		});
+
+  //     		// making jQuery-object
+  //     		var $items = $( items );
+  // 			// appending items to grid
+  // 			$grid_filtered.masonryImagesReveal( $items );
+
+		// });
+
+		// myDropzone.on("addedfile", function(file) {
+		//   // Hookup the start button
+		//   file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file); };
+		// });
+
+		// Update the total progress bar
+		// myDropzone.on("totaluploadprogress", function(progress) {
+		//   document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+		// });
+
+		// myDropzone.on("sending", function(file) {
+		//   // Show the total progress bar when upload starts
+		//   document.querySelector("#total-progress").style.opacity = "1";
+		//   // And disable the start button
+		//   file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+		// });
+
+		// Hide the total progress bar when nothing's uploading anymore
+		// myDropzone.on("queuecomplete", function(progress) {
+		//   document.querySelector("#total-progress").style.opacity = "0";
+		// });
+
+		// Setup the buttons for all transfers
+		// The "add files" button doesn't need to be setup because the config
+		// `clickable` has already been specified.
+		// document.querySelector("#actions .start").onclick = function() {
+		//   myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
+		// };
+		// document.querySelector("#actions .cancel").onclick = function() {
+		//   myDropzone.removeAllFiles(true);
+		// };
+
+		/* Keyword Suggestion for search bar */
+		(function () {
+		    var displayResults, findAll, maxResults, names, resultsOutput, searchInput;
+
+		    findAll = function (_this) {
+		        return function (wordList, collection) {
+		            return collection.filter(function (word) {
+		                word = word.toLowerCase();
+		                return wordList.some(function (w) {
+		                    return ~word.indexOf(w);
+		                });
+		            });
+		        };
+		    }(this);
+		    displayResults = function (resultsEl, wordList) {
+		    	var wordsMap = wordList.map(function (w) {
+		            return String.format("<li> {0} </li>", w);
+		        }).join('');
+		        return resultsEl.innerHTML = wordList.length ? wordsMap : String.format("<li> {0} </li>", "No matched words");
+		    };
+		    searchBox = document.getElementById('search-box');
+		    searchInput = document.getElementById('search');
+		    resultsOutput = document.getElementById('results');
+		    returnBottom = document.getElementById('return-icon');
+		    maxResults = 15;
+		    
+		    // KeyUp event
+		    searchInput.addEventListener('keyup', function (_this) {
+		        return function (e) {
+		        	$.ajax({
+					    url : "{% url 'ajax_load_Keyword_view' %}",
+					    type: "GET",
+					    success: function(response, textStatus, jqXHR){
+				            var suggested, value;
+				            names = response.keywords;
+				            value = searchInput.value.toLowerCase().split(' ');
+				            suggested = value[0].length ? findAll(value, names) : [];
+				            return displayResults(resultsOutput, suggested);
+					    },
+					    error: function (jqXHR, textStatus, errorThrown){
+					 		console.log(errorThrown)
+					    }
+					});
+		        };
+		    }(this));
+
+		    // MouseEnter event
+		    searchBox.addEventListener('mouseenter', function (_this) {
+		    	return function (e){
+		    		var searchIconHidden = _this.getElementsByClassName('search-icon-hidden');
+		    		searchIconHidden[0].style.display = "inline";
+		    		console.log("mouse enters...");
+		    	}
+		    }(this));
+
+		    // MouseLeave event
+		    searchBox.addEventListener('mouseleave', function (_this) {
+		    	return function (e){
+		    		var searchIconHidden = _this.getElementsByClassName('search-icon-hidden');
+		    		searchIconHidden[0].style.display = "none";
+		    		console.log("mouse leaves...");
+		    	}
+		    }(this));
+
+		    // MouseDown event
+		    searchInput.addEventListener('mousedown', function (_this) {
+		    	return function (e){
+		    		$.ajax({
+					    url : "{% url 'ajax_load_Keyword_view' %}",
+					    type: "GET",
+					    success: function(response, textStatus, jqXHR){
+					    	var suggested = response.keywords;
+				            return displayResults(resultsOutput, suggested);
+					    },
+					    error: function (jqXHR, textStatus, errorThrown){
+					 		console.log(errorThrown)
+					    }
+					});
+		    		console.log("mouse down...");
+	    		}
+		    }(this));
+
+		    // MouseDown event on Search List (<ul> element)
+		    resultsOutput.addEventListener('mousedown', function (_this) {
+		    	return function (e) {
+		    		// clicked keyword on input text
+		    		searchInput.value = e.target.innerText;  // NOTE: "innerText" not supported by Firefox
+
+		    		// show div for search result
+					$('#myGrid').hide();
+					$('#myGrid-filtered').show();
+
+					// remove Search List (<ul>'s all children element)
+					while(resultsOutput.firstChild){
+						resultsOutput.removeChild(resultsOutput.firstChild);
+					}
+
+		    		// GET request on keyword-related images
+		    		$.ajax({
+					    url : "{% url 'ajax_load_Album_photo_view' %}",
+					    type: "GET",
+					    data: {keywords : searchInput.value},
+					    success: function(response, textStatus, jqXHR){
+							var items = "";
+			
+							// loading images
+							var photo_urls = response.image_set;
+							for(var _i=0; _i<photo_urls.length; _i++){
+								items = items + String.format("<div class=\"grid-item\"> <img src={0}/> </div>", photo_urls[_i]);
+							}
+
+				      		// making jQuery-object
+				      		var $items = $( items );
+				  			// appending items to grid
+				  			$grid_filtered.masonryImagesReveal( $items );
+					    },
+					    error: function (jqXHR, textStatus, errorThrown){
+					 		console.log(errorThrown)
+					    },
+					});
+		    		console.log("mouse down on <ul> element...");
+		    	}
+		    }(this));
+
+			// MouseLeave event on Search List (<ul> element)
+		    resultsOutput.addEventListener('mouseleave', function (_this) {
+		    	return function (e) {;
+
+					// remove Search List (<ul>'s all children element)
+					while(resultsOutput.firstChild){
+						resultsOutput.removeChild(resultsOutput.firstChild);
+					}
+		    		console.log("mouse leaves on <ul> element...");
+		    	}
+		    }(this));
+
+
+			// Click event on returnBottom ("return-icon" element)
+		    returnBottom.addEventListener('click', function (_this) {
+		    	return function (e) {
+		    		
+		    		// empty search input
+		    		searchInput.value = "";
+
+		    		// return to album section
+					$('#myGrid').show();
+					$('#myGrid-filtered').hide();
+					$('#myGrid-retreival').hide();
+
+					// remove all child divs (that contain filtered images)
+					$('#myGrid-filtered').masonryImagesRemoval( $('#myGrid-filtered .grid-item') );
+					$('#myGrid-retreival').masonryImagesRemoval( $('#myGrid-retreival .grid-item-retrieval') );
+		    	}
+		    }(this));
+		}.call(this));
+	});
+
+</script>
+{% endblock %}
+
+<!-- +++++ Main Contect +++++ -->
+{% block content %}
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<!-- +++++ Search Bar Section +++++ -->
+			<div class="search-container">
+				<div class="return-icon" id="return-icon" data-toggle="tooltip" title="return">
+					<i class="flaticon-back"></i>
+				</div>
+				<div class="search-box" id="search-box">
+					<div class="search-icon">
+						<i class="flaticon-magnifying-glass"></i>
+					</div>
+					<input id="search" type="text" placeholder="Search" autocomplete="off" class="search-input"/>
+					<ul id="results" class="search-results"></ul>
+					<div class="search-icon-hidden" data-toggle="tooltip" title="image search">
+						<i class="flaticon-interface" id="image-search-icon"></i>
+					</div>
+				</div>
+				<div class="upload-icon" id="actions" data-toggle="tooltip" title="upload">
+					<i class="flaticon-plus" id="upload-icon"></i>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<!-- +++++ Dropzone Template +++++ 
+		 TODO: Finish the UI design of Upload/Cancel/Pause together 
+	-->
+
+
+	<!-- Default Template of uploading/adding files progress (temp: display in NONE)
+		 TODO: integrate the UI of this process with that from the above
+	-->
+	<div class="table table-striped" class="files" id="previews" style="display: none;">
+
+	  <div id="template" class="file-row">
+	    <!-- This is used as the file preview template -->
+	    <div>
+	        <span class="preview"><img data-dz-thumbnail /></span>
+	    </div>
+	    <div>
+	        <p class="name" data-dz-name></p>
+	        <strong class="error text-danger" data-dz-errormessage></strong>
+	    </div>
+	    <div>
+	        <p class="size" data-dz-size></p>
+	        <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+	          <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+	        </div>
+	    </div>
+	    <div>
+	      <button class="btn btn-primary start">
+	          <i class="glyphicon glyphicon-upload"></i>
+	          <span>Start</span>
+	      </button>
+	      <button data-dz-remove class="btn btn-warning cancel">
+	          <i class="glyphicon glyphicon-ban-circle"></i>
+	          <span>Cancel</span>
+	      </button>
+	      <button data-dz-remove class="btn btn-danger delete">
+	        <i class="glyphicon glyphicon-trash"></i>
+	        <span>Delete</span>
+	      </button>
+	    </div>
+	  </div>
+
+	</div>
+
+	<!-- +++++ Album Section (Mansory Grid) +++++ -->
+	<div class="grid" id="myGrid">
+	  <div class="grid-sizer"></div>
+	  <div class="gutter-sizer"></div>
+	</div> <!-- Album Section -->
+
+	<!-- +++++ Album Section (filtered) (Mansory Grid) +++++ -->
+	<div class="grid" id="myGrid-filtered">
+	  <div class="grid-sizer"></div>
+	  <div class="gutter-sizer"></div>
+	</div> <!-- Album Section -->
+
+		<!-- +++++ Album Section (filtered) (Mansory Grid) +++++ -->
+	<div class="grid-retreival" id="myGrid-retreival">
+	  <div class="grid-sizer-retrieval"></div>
+	  <div class="gutter-sizer"></div>
+	</div> <!-- Album Section -->
+
+{% endblock %}

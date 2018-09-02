@@ -1,0 +1,87 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="{% static 'homepage/img/favicon.ico' %}">
+
+    <title>Play Ground</title>
+	
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+
+    <!-- Custom JavaScript -->
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+    <script src="{% static 'js/hover.zoom.js' %}"></script>
+    <script src="{% static 'js/hover.zoom.conf.js' %}"></script>
+    
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- BETTER Placed at the end of the document so the pages load faster -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    
+    <!-- Added static files per App -->
+    {% block static %} {% endblock %}
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Static navbar (FIXED) -->
+    <div class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{% url 'index' %}">Play Ground</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'work' %}">Work</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'blog' %}">Blog</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+    
+    <!-- +++++ Per Main Page Content Section +++++ -->
+    {% block content %}{% endblock %}
+	
+	<!-- +++++ Footer Section (FIXED) +++++ -->
+ 	<div id="footer"> 
+		<div class="container">
+			<div class="row">				
+				<div class="col-lg-12">
+					 <p>
+            <a href="#"> <img src="{% static 'img/LI-logo-white-128.png' %}" alt="LinkedIn" class="TM-logo"> </a>
+
+            <a href="#"> <img src="{% static 'img/FB-logo-white-512.png' %}" alt="FaceBook" class="TM-logo"> </a>
+
+            <a href="#"> <img src="{% static 'img/GH-logo-white-128.png' %}" alt="GitHub" class="TM-logo"> </a>
+					</p>
+				</div>
+			</div>
+		
+		</div>
+	</div>
+
+  </body>
+</html>

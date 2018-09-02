@@ -1,0 +1,278 @@
+	/*
+  	Flaticon icon font: Flaticon
+  	Creation date: 04/05/2016 17:28
+  	*/
+
+@font-face {
+  font-family: "Flaticon";
+  src: url("./Flaticon.eot");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff") format("woff"),
+       url("./Flaticon.ttf") format("truetype"),
+       url("./Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./Flaticon.svg#Flaticon") format("svg");
+  }
+}
+
+/* GENERAL icon attributes */
+[class^="flaticon"]:before, [class*=" flaticon"]:before,
+[class^="flaticon"]:after, [class*=" flaticon"]:after {   
+  font-family: Flaticon;
+  font-size: 30px;
+  font-style: normal;
+  vertical-align: inherit;
+  margin-left: 5px;
+}
+
+[class*=" flaticon-"], [class^="flaticon-"]:hover { 
+  cursor: pointer; 
+  color: #000000;
+  text-shadow: 2px 2px 2px #ccc;
+ }
+
+ /* SPECIALIZED icon attributes */
+.flaticon-interface:before, .flaticon-interface:after { 
+  font-family: Flaticon;
+  font-size: 25px;
+  font-style: normal;
+  margin-left: 2.5px;
+  color: #000000;
+}
+
+[class*=" flaticonSocial-"], [class^="flaticonSocial-"]:hover { 
+  cursor: pointer; 
+  color: white;
+ }
+
+.flaticon-back:before { content: "\f100"; }
+.flaticon-cancel:before { content: "\f101"; }
+.flaticon-garbage:before { content: "\f102"; }
+.flaticon-interface:before { content: "\f104"; }
+.flaticon-magnifying-glass:before { content: "\f106"; }
+.flaticon-music:before { content: "\f107"; }
+.flaticon-next:before { content: "\f108"; }
+.flaticon-pause-button:before { content: "\f109"; }
+.flaticon-photo-camera:before { content: "\f10a"; }
+.flaticon-play-button:before { content: "\f10b"; }
+.flaticon-plus:before { content: "\f10c"; }
+.flaticon-upload:before { content: "\f10e"; }
+.flaticon-video:before { content: "\f10f"; }
+
+.flaticonSocial-linkedin:before { content: "\f105"; }
+.flaticonSocial-github:before { content: "\f103"; }
+.flaticonSocial-facebook:before { content: "\f10d"; }
+
+/* Temporary Section for Search Bar */
+/* ============================ */
+/* VARIABLES                    */
+/* ============================ */
+/* ============================ */
+/* SEARCH BAR                   */
+/* ============================ */
+.search-container {
+  margin: 30px auto;
+  width: 60%;
+}
+
+/* RWD */
+@media screen and (min-width: 769px) {
+  .search-container {
+    width: 60%;
+  }
+}
+
+@media screen and (min-width: 592px) and (max-width: 768px) {
+  .search-container {
+    width: 80%;
+  }
+}
+
+@media screen and (min-width: 0px) and (max-width: 591px) {
+  .search-container {
+    width: 100%;
+  }
+}
+
+/* Top left */
+.return-icon {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+/*  background-color: #f2f2f2;*/
+  float: left;
+  width: 9%;
+  height: 40px;
+  margin-right: 1%;
+  position: relative;
+}
+
+/* Top middle */
+.search-box {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #f2f2f2;
+  float: left;
+  width: 80%;
+  height: 40px;
+  position: relative;
+}
+
+.search-icon {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  float: left;
+  width: 10%;
+  height: 40px;
+  position: relative
+}
+
+.search-input {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 80%;
+  height: 40px;
+  float: left;
+  background-color: transparent;
+  border: 0px;
+  padding: 10px;
+  text-transform: uppercase;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.30em;
+  position: relative;
+  outline: 5px;
+}
+
+.search-icon-hidden {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  float: right;
+  width: 10%;
+  height: 40px;
+  font-size: 1.30em;
+  position: relative;
+  display: none;
+  padding-top: 1%;
+}
+
+
+/* Top right */
+.upload-icon {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+/*  background-color: #f2f2f2;*/
+  float: left;
+  width: 9%;
+  height: 40px;
+  font-size: 1.30em;
+  position: relative;
+  margin-left: 1%;
+}
+
+/* At-rules for animation [keyword-search suggestion popup] */
+@-webkit-keyframes fadeInTop {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-1.334em) translateZ(0);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-moz-keyframes fadeInTop {
+  0% {
+    opacity: 0;
+    -moz-transform: translateY(-1.334em) translateZ(0);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fadeInTop {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-1.334em) translateZ(0);
+    -moz-transform: translateY(-1.334em) translateZ(0);
+    -ms-transform: translateY(-1.334em) translateZ(0);
+    -o-transform: translateY(-1.334em) translateZ(0);
+    transform: translateY(-1.334em) translateZ(0);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.search-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 999;
+  width: 100%;
+  max-height: 600px;
+  overflow: scroll;
+  top: 40px; /* shift down 40px (ie. away from top 40px) */
+  left: 0px;
+  text-align: left;
+}
+
+.search-results li {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  width: 100%;
+  height: 40px;
+  float: right;
+  background-color: #f2f2f2;
+  color: gray;
+  font-weight: bold;
+  font-size: 1.20em;
+  /* ANIMATION */
+  /* remove this part if you dont like the animation */
+  /* END OF ANIMATION */
+}
+
+.search-results li:hover {
+  background-color: #66CDAA;
+  color: white;
+  cursor: pointer;
+}
+
+/* Animation (Turned off)*/
+/*.search-results li:nth-child(1) {
+  -webkit-animation: fadeInTop 0.1s 0.0s forwards;
+  animation: fadeInTop 0.1s 0.0s forwards;
+  opacity: 0;
+}
+.search-results li:nth-child(2) {
+  -webkit-animation: fadeInTop 0.1s 0.02s forwards;
+  animation: fadeInTop 0.1s 0.02s forwards;
+  opacity: 0;
+}
+.search-results li:nth-child(3) {
+  -webkit-animation: fadeInTop 0.1s 0.04s forwards;
+  animation: fadeInTop 0.1s 0.04s forwards;
+  opacity: 0;
+}
+.search-results li:nth-child(4) {
+  -webkit-animation: fadeInTop 0.1s 0.06s forwards;
+  animation: fadeInTop 0.1s 0.06s forwards;
+  opacity: 0;
+}
+.search-results li:nth-child(5) {
+  -webkit-animation: fadeInTop 0.1s 0.08s forwards;
+  animation: fadeInTop 0.1s 0.08s forwards;
+  opacity: 0;
+}*/

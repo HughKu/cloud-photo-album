@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!-- Added Script -->
+{% block static %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.2.0/dropzone.css" rel="stylesheet">
+<link href="{% static 'work/css/masonry.css' %}" rel="stylesheet">
+
+<script src="{% static 'work/js/dropzone_custom.js' %}"></script>
+<script src="{% static 'work/js/masonry.pkgd.min.js' %}"></script>
+<script src="{% static 'work/js/imagesloaded.pkgd.min.js' %}"></script>
+<script type="text/javascript">
+
+	/* Formatted-String (Javascript) */ 
+	String.format = function() {
+	    // The string containing the format items (e.g. "{0}")
+	    // will and always has to be the first argument.
+	    var theString = arguments[0];
+	    
+	    // start with the second argument (i = 1)
+	    for (var i = 1; i < arguments.length; i++) {
+	        // "gm" = RegEx options for Global search (more than one instance)
+	        // and for Multiline search
+	        var regEx = new RegExp("\\{" + (i - 1) + "\\}", "gm");
+	        theString = theString.replace(regEx, arguments[i]);
+	    }
+	    
+	    return theString;
+	}
+
+	/* Overrided (added) jQuery's prototype function */
+	$.fn.masonryImagesReveal = function( _items ) {
+		var msnry = this.data('masonry');
+		var itemSelector = msnry.options.itemSelector;
+		// hide by default
+		_items.hide();
+		// append to container
+		this.append( _items );
+		_items.imagesLoaded().progress( function( imgLoad, image ) {
+			// get item
+			// image is imagesLoaded class, not <img>, <img> is image.img
+			var $item = $( image.img ).parents( itemSelector );
+			// un-hide item
+			$item.show();
+			// masonry does its thing
+			msnry.appended( $item );
+		});
+  
+  		return this;
+	};
+
+	/* Flickr Images Loading */
+	var ajax_load_Flickr = function( _grid ) {
+		$.get("{% url 'ajax_load_Flickr_photo_view' %}").done(function( data ) {
+				var items = "";
+				
+				// loading images
+				var photo_list = data.image_set.photo;
+				for(var _i=0; _i<photo_list.length; _i++){
+					items = items + String.format("<div class=\"grid-item\"> <img src={0} href=\"#classification_section_top\"/> </div>", photo_list[_i].url_m);
+				}
+
+	      		// making jQuery-object
+	      		var $items = $( items );
+	  			// appending items to grid
+	  			_grid.masonryImagesReveal( $items );
+	  			// periodically invoking this function
+	  			//setTimeout(ajaxQueryImages, 5000);
+		})
+	};
+
+	$(document).ready(function(){
+
+
+		/* Init Masonry Arguments */
+		var $grid = $('#myGrid').masonry({
+			columnWidth: '.grid-sizer',
+			gutter: '.gutter-sizer',
+			itemSelector: '.grid-item',
+			percentPosition: true,
+			initLayout: false,
+			transitionDuration: '0.4s',
+		});
+
+
+		/* Ajax GET: Load Images (invoked ONCE) */
+		(function ajaxQueryImages(){
+			ajax_load_Flickr( $grid );
+		})();
+
+		/* Click Event: Masonry grid-Item */
+		var $root = $('html, body');
+		$grid.on( 'click', '.grid-item img', function() {
+
+			// trigger ajax request for image classification [TensorFLow]
+			/*
+			$.ajax({
+			    url : "{% url 'ajax_cros_request_Tensorflow_view' %}",
+			    type: "POST",
+			    data : {'img_url': this.src},
+			    beforeSend: function(){
+			    	// loading animation starts
+			    	console.log('loading animation...');
+			    	$( "#cls-loading-inception" ).show();
+			    },
+			    success: function(response, textStatus, jqXHR){
+			    	console.log('ajax success...');
+					// display result table for 'Inception'
+					var result = response.result[1];
+					for(var i=0; i<result.length; i++){
+						var result_i = result[i]; 
+						$('#class-Inception-' + (i+1)).html(result_i[0]);
+						$('#predict-Inception-' + (i+1)).html((result_i[1]*100).toFixed(2) + "%");
+						$('#bar-Inception-' + (i+1)).attr('style', String.format("width:{0}%;", (result_i[1]*100).toFixed(2)));
+					}
+			    },
+			    complete: function(){
+			    	// loading animation ends
+			    	$( "#cls-loading-inception" ).hide();
+			    },
+			    error: function (jqXHR, textStatus, errorThrown){
+			 		console.log('ajax error');
+			    }
+			});
+			*/
+			// trigger ajax request for image classification [Caffe]
+			$.ajax({
+			    url : "{% url 'ajax_cros_request_Caffe_view' %}",
+			    type: "POST",
+			    data : {'img_url': this.src},
+			    beforeSend: function(){
+			    	// loading animation starts
+			    	$( "#cls-loading-alex" ).show();
+			    },
+			    success: function(response, textStatus, jqXHR){
+			       	// display result table for 'Alex'
+					var result = response.result[1];
+					for(var i=0; i<result.length; i++){
+						var result_i = result[i]; 
+						$('#class-Alex-' + (i+1)).html(result_i[0]);
+						$('#predict-Alex-' + (i+1)).html((result_i[1]*100).toFixed(2) + "%");
+						$('#bar-Alex-' + (i+1)).attr('style', String.format("width:{0}%;", (result_i[1]*100).toFixed(2)));
+
+			 		}
+			    },
+			    complete: function(){
+			    	// loading animation ends
+			    	$( "#cls-loading-alex" ).hide();
+			    },
+			    error: function (jqXHR, textStatus, errorThrown){
+			 		// To be defined
+			 		console.log("error...");
+			    }
+			});
+			
+			// navigate slowly to the top section for classification visualization
+			$root.animate({
+		        scrollTop: $( $.attr(this, 'href') ).offset().top
+		    }, 500);
+
+			// display the target image to the left of resulting bar
+			$('#target-img').attr('src', this.src);
+		});
+		
+	});
+
+	// Dropzone Behavior
+	Dropzone.options.myDropzone = {
+		// Initial Add-ons
+	    autoProcessQueue: true,
+	    addRemoveLinks: true,
+	    paramName: "img",
+	    acceptedFiles: "image/*",
+	    dictDefaultMessage: "Drop images here to classify",
+		init: function () {
+			
+			// Find the current object
+			myDropzone = this;
+
+			// SUCCESS Event
+			this.on("success", function(file, response) {
+				//TODO: base64-encoded image
+				/*
+				console.log('<img src="data:image/jpg;base64,' + response.imageURL + '" />');
+				$('.droppedimage').html('<img src="data:image/jpg;base64,' + response.imageURL + '" />');
+				*/
+
+				// display the target image to the left of resulting bar
+				console.log(response.imageURL)
+				$('#target-img').attr('src', response.imageURL);
+
+				// URL-encoded image
+				// display result table
+				var result = response.result[1];
+				for(var i=0; i<result.length; i++){
+					var result_i = result[i]; 
+						$('#class-' + (i+1)).html(result_i[0]);
+						$('#predict-' + (i+1)).html((result_i[1]*100).toFixed(2) + "%");
+						$('#bar-' + (i+1)).attr('style', String.format("width:{0}%;", (result_i[1]*100).toFixed(2)));
+				}
+			});
+		},
+	}
+
+
+
+</script>
+{% endblock %}
+
+<!-- +++++ Main Contect +++++ -->
+{% block content %}
+
+	<!-- +++++ Projects Section +++++ -->
+	<div class="container pt">
+		<div class="row mt" id="classification_section_top">
+			<div class="col-lg-6 col-lg-offset-3 centered">
+				<h3>Image Classification</h3>
+				<hr>
+				<p>Random Flickr Images Below...</p>
+			</div>
+		</div>
+	
+		<div class="row mt centered">
+
+			<!-- (left) Dropzone -->
+	   		<!-- <div class="col-lg-4">
+				<form class="dropzone" action="{% url 'ajax_photo_upload_view' %}" method ="post" id="myDropzone" enctype="multipart/form-data">
+				{% csrf_token %}
+            	</form>
+            	<br></br>
+			</div>  --><!-- Dropzone -->
+
+			<!-- (Middle) Target Image -->
+			<div class="col-lg-6">
+				<img id="target-img" src=""/>
+			</div> <!-- Target Image -->
+
+			<!-- (right) Wrapped Result Display -->
+			<div class="col-lg-6">
+
+				<!--  Inception_v3 -->
+				<div class="col-lg-12"> <p style="text-align:left; font-size:18px; margin-bottom: 5px;"> Inception says... </p> </div>
+
+				<!-- Ajax loading animation -->
+				<div id="cls-loading-inception" class="col-lg-12 loading-div">
+					<!-- *style.width=20%* represents the 20% size of its parent div  -->
+					<img src="{% static 'work/img/svg-loaders/oval.svg' %}" style="width:8%;" />
+				</div>
+
+				<!-- (right) Probability Bar -->
+				<div class="col-lg-6">
+					<div class="progress">
+						<div id="bar-Inception-1" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"><p id="predict-Inception-1" class="bar-text">44%</p>
+							<!-- span class="sr-only">60% Complete</span -->
+						</div>
+					</div>
+					
+					<div class="progress">
+						<div id="bar-Inception-2" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"><p id="predict-Inception-2" class="bar-text">41%</p>
+							<!-- <span class="sr-only">80% Complete</span> -->
+						</div>
+					</div>
+
+					<div class="progress">
+						<div id="bar-Inception-3" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"><p id="predict-Inception-3" class="bar-text">1%</p>
+							<!-- <span class="sr-only">95% Complete</span> -->
+						</div>
+					</div>
+					
+					<div class="progress">
+						<div id="bar-Inception-4" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"><p id="predict-Inception-4" class="bar-text">1%</p>
+							<!-- <span class="sr-only">95% Complete</span> -->
+						</div>
+					</div>
+					
+					<div class="progress">
+						<div id="bar-Inception-5" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" style="width: 70%;"><p id="predict-Inception-5" class="bar-text">1%</p>
+							<!-- <span class="sr-only">95% Complete</span> -->
+						</div>
+					</div>
+				</div> <!-- Probability Bar -->
+
+				<!-- (right) Predicted Class -->
+				<div class="col-lg-6">
+					<div class="class-text">
+						<p id="class-Inception-1">Motorcycle</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Inception-2">Car</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Inception-3">Pilot</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Inception-4">Cat</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Inception-5">Dog</p>
+					</div>
+				</div> <!-- Predicted Class -->
+
+				<div class="col-lg-12" style="height: 20px">
+				</div>
+
+				<!--  AlexNet -->
+				<div class="col-lg-12"> <p style="text-align:left; font-size:18px; margin-bottom: 5px;"> Alex says... </p> </div>
+
+				<!-- Ajax loading animation -->
+				<div id="cls-loading-alex" class="col-lg-12 loading-div" style="top: 235px;">
+					<!-- *style.width=20%* represents the 20% size of its parent div  -->
+					<img src="{% static 'work/img/svg-loaders/oval.svg' %}" style="width:8%;" />
+				</div>
+
+				<!-- (right) Probability Bar -->
+				<div class="col-lg-6">
+					<div class="progress">
+						<div id="bar-Alex-1" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"><p id="predict-Alex-1" class="bar-text">44%</p>
+							<!-- span class="sr-only">60% Complete</span -->
+						</div>
+					</div>
+					
+					<div class="progress">
+						<div id="bar-Alex-2" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"><p id="predict-Alex-2" class="bar-text">41%</p>
+							<!-- <span class="sr-only">80% Complete</span> -->
+						</div>
+					</div>
+
+					<div class="progress">
+						<div id="bar-Alex-3" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"><p id="predict-Alex-3" class="bar-text">1%</p>
+							<!-- <span class="sr-only">95% Complete</span> -->
+						</div>
+					</div>
+					
+					<div class="progress">
+						<div id="bar-Alex-4" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"><p id="predict-Alex-4" class="bar-text">1%</p>
+							<!-- <span class="sr-only">95% Complete</span> -->
+						</div>
+					</div>
+					
+					<div class="progress">
+						<div id="bar-Alex-5" class="progress-bar progress-bar-theme" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" style="width: 70%;"><p id="predict-Alex-5" class="bar-text">1%</p>
+							<!-- <span class="sr-only">95% Complete</span> -->
+						</div>
+					</div>
+				</div> <!-- Probability Bar -->
+
+				<!-- (right) Predicted Class -->
+				<div class="col-lg-6">
+					<div class="class-text">
+						<p id="class-Alex-1">Motorcycle</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Alex-2">Car</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Alex-3">Pilot</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Alex-4">Cat</p>
+					</div>
+					<div class="class-text">
+						<p id="class-Alex-5">Dog</p>
+					</div>
+				</div> <!-- Predicted Class -->
+			</div> <!-- Wrapped Result Display -->
+
+		</div> <!-- Row-center -->
+
+		<!-- Mansory Image Grid -->
+		<div class="grid" id="myGrid">
+		  <div class="grid-sizer"></div>
+		  <div class="gutter-sizer"></div>
+		</div> <!-- Mansory Image Grid -->
+
+	</div><!-- /container -->
+{% endblock %}

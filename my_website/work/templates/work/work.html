@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!-- +++++ Main Contect +++++ -->
+{% block content %}
+	
+	<!-- +++++ Projects Section +++++ -->
+	
+	<div class="container pt">
+		<div class="row mt">
+			<div class="col-lg-6 col-lg-offset-3 centered">
+				<h3>MY PLAYGROUND</h3>
+				<hr>
+				<p>Curiosity Drives Me Moving Forward</p>
+			</div>
+		</div>
+		<div class="row mt centered">	
+			<div class="col-lg-12">
+				<a class="zoom green" href="{% url 'image_classification' %}"><img class="img-responsive" src="{%  static 'work/img/portfolio/port02.jpg' %}" alt="" /></a>
+				<p>Image Classification</p>
+			</div>
+		</div><!-- /row -->
+	</div><!-- /container -->
+	
+{% endblock %}
