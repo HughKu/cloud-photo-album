@@ -3,20 +3,23 @@
 # Cloud-photo-album
 A demo photo album featuring search by image using deep feature learning.
 
-## Demo Video (click ro watch)
+## Demo Video (click to watch)
 [![Demo](asset/success.png)](https://youtu.be/bawuL6eBYGw "Demo")
 
+---
 ## Features
-### Auto-labeling when uploading images
+### :one: Auto-labeling when uploading images
 ![upload](asset/upload.png)
-### Search by Text
+### :two: Search by Text
 ![search-by-text](asset/search_by_text.png)
-### Search by Image
+### :three: Search by Image
 ![search-by-image](asset/search_by_image.png)
 
+---
 ## Architecture
 ![architecture](asset/architecture.svg)
 
+---
 ## Install and Run
 1. Get off-the-shelf dependencies 
 ```shell
